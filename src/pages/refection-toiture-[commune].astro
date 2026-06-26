@@ -1,0 +1,410 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SchemaMarkup from '../components/SchemaMarkup.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import StepsForm from '../components/StepsForm.astro';
+import communes from '../data/communes.json';
+import { generateCommuneContent, getDynamicPrices } from '../lib/contentEngine';
+import { getSmartNearbyCommunes } from '../lib/geoLinks';
+
+export async function getStaticPaths() {
+  return communes.map((c) => ({
+    params: { commune: c.slug },
+    props: { commune: c },
+  }));
+}
+
+const { commune } = Astro.props;
+const pageType = 'refection';
+const local = generateCommuneContent(commune, pageType);
+const prices = getDynamicPrices(commune);
+const nearby = getSmartNearbyCommunes(commune.slug, communes, 6, 2);
+
+const title = local.title;
+const description = local.introParagraph.substring(0, 160);
+
+const breadcrumbItems = [
+  { label: "Accueil", href: "/" },
+  { label: "Villes Loire-Atlantique (44)", href: "/communes/" },
+  { label: `Toiture & Charpente à ${commune.nom}` }
+];
+---
+
+<Layout title={title} description={description}>
+  <SchemaMarkup
+    slot="head"
+    pageUrl={Astro.url.href}
+    pageTitle={title}
+    pageDescription={description}
+    faqItems={local.faqItems}
+    breadcrumbItems={[
+      { label: "Accueil", href: "/" },
+      { label: "Villes Loire-Atlantique", href: "/communes/" },
+      { label: `Toiture & Charpente à ${commune.nom}` }
+    ]}
+    communeName={commune.nom}
+    communeData={commune}
+  />
+
+  <Breadcrumb items={breadcrumbItems} />
+
+  <!-- ═══ HERO SECTION ═══ -->
+  <section style="background: linear-gradient(135deg, rgba(15,23,42,0.07) 0%, rgba(132,204,22,0.04) 100%); padding: 55px 0; border-bottom: 2px solid var(--border-color); position: relative;">
+    <div class="container">
+      <div class="two-column-layout">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <div class="badge-pill" style="width: max-content; margin-bottom: 18px;">
+            🛡️ Couverture & Rénovation — {commune.nom} ({commune.codePostal})
+          </div>
+          <h1 style="font-family: var(--font-heading); font-size: 36px; font-weight: 900; color: var(--primary); line-height: 1.25; margin-bottom: 18px;">
+            Toiture &amp; Charpente à <span style="color: var(--accent);">{commune.nom}</span> ({commune.codePostal})
+          </h1>
+          <p style="font-size: 16px; line-height: 1.75; color: var(--text); margin-bottom: 22px;">
+            {local.introParagraph}
+          </p>
+
+          <!-- Silo de maillage interne localisé -->
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 22px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: white; border: 1.5px solid var(--border-color); padding: 10px 15px; border-radius: var(--radius-sm);">
+            <span style="font-weight: bold; color: var(--primary); font-size: 12px;">📍 À {commune.nom} :</span>
+            <a href={`/demoussage-toiture-${commune.slug}/`} style="color: var(--accent); font-weight: 800; text-decoration: none; border-bottom: 1px dashed var(--accent);">🧼 Démoussage &amp; Nettoyage</a>
+            <span style="color: var(--border-color);">·</span>
+            <a href={`/couvreur-ardoisier-${commune.slug}/`} style="color: var(--accent); font-weight: 800; text-decoration: none; border-bottom: 1px dashed var(--accent);">👤 Artisan Couvreur RGE</a>
+          </div>
+
+          <!-- Tuile dominante / Fixation technique -->
+          {local.roofCharacteristics && (
+            <div style="background: white; border: 1.5px solid var(--border-color); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: var(--radius-sm); margin-bottom: 22px;">
+              <div style="font-weight: 800; color: var(--accent); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">📐 Données Techniques — Toitures à {commune.nom}</div>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.8;">
+                {local.roofCharacteristics.tuileDominante && <li>🪨 <strong>Matériau principal :</strong> {local.roofCharacteristics.tuileDominante}</li>}
+                {local.roofCharacteristics.fixation && <li>🔩 <strong>Fixation préconisée :</strong> {local.roofCharacteristics.fixation}</li>}
+                {local.roofCharacteristics.ventilation && <li>💨 <strong>Ventilation requise :</strong> {local.roofCharacteristics.ventilation}</li>}
+                {local.roofCharacteristics.ecran && <li>🛡️ <strong>Écran recommandé :</strong> {local.roofCharacteristics.ecran}</li>}
+              </ul>
+            </div>
+          )}
+
+          <!-- Conseil local -->
+          {local.conseilLocal && (
+            <div style="background: #F1F5F9; border: 1.5px solid var(--border-color); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: var(--radius-sm); margin-bottom: 22px;">
+              <div style="font-weight: 800; color: var(--primary); margin-bottom: 6px; font-size: 14px;">💡 Conseil Pratique à {commune.nom} :</div>
+              <p style="font-size: 13.5px; color: var(--text-muted); margin: 0; line-height: 1.6;">{local.conseilLocal}</p>
+            </div>
+          )}
+
+          <!-- Stats rapides -->
+          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="background: white; border: 1.5px solid var(--border-color); padding: 12px 18px; border-radius: var(--radius-sm); text-align: center; flex: 1; min-width: 100px;">
+              <div style="font-size: 20px; font-weight: 900; color: var(--primary);">{commune.marketData?.couvreursRGE || 3}</div>
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Couvreurs RGE</div>
+            </div>
+            <div style="background: white; border: 1.5px solid var(--border-color); padding: 12px 18px; border-radius: var(--radius-sm); text-align: center; flex: 1; min-width: 100px;">
+              <div style="font-size: 20px; font-weight: 900; color: var(--primary);">{prices.refectionArdoiseAngers.min}€</div>
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Dès /m² TTC</div>
+            </div>
+            <div style="background: white; border: 1.5px solid var(--border-color); padding: 12px 18px; border-radius: var(--radius-sm); text-align: center; flex: 1; min-width: 100px;">
+              <div style="font-size: 20px; font-weight: 900; color: var(--primary);">{commune.marketData?.delaiMoyenJours || 10}j</div>
+              <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Délai devis</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Form -->
+        <div>
+          <StepsForm initialZip={commune.codePostal} initialCommune={commune.nom} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {local.sectionOrder.map((sectionId) => {
+    if (sectionId === 'specificities') {
+      return (
+        <section style="padding: 70px 0; background-color: var(--card-bg);">
+          <div class="container">
+            <div style="text-align: center; max-width: 800px; margin: 0 auto 50px;">
+              <h2 style="font-family: var(--font-heading); font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 14px;">
+                {local.headings.specificities}
+              </h2>
+              <p style="font-size: 15.5px; color: var(--text-muted);">
+                Climat, patrimoine et réglementation locale : ce que tout couvreur du 44 doit maîtriser à {commune.nom}.
+              </p>
+            </div>
+
+            {local.introText && (
+              <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 35px; margin-bottom: 45px; box-shadow: var(--shadow-sm); display: grid; grid-template-columns: 1.20fr 0.80fr; gap: 35px; align-items: start; text-align: left;">
+                <div>
+                  <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    🏠 Architecture locale & spécificités des toits à {commune.nom}
+                  </h3>
+                  <p style="font-size: 14.5px; line-height: 1.8; color: var(--text); margin: 0;">
+                    {local.introText}
+                  </p>
+                  {local.conseilLocal && (
+                    <div style="margin-top: 20px; background: var(--primary-light); border-left: 4px solid var(--accent); padding: 15px 20px; border-radius: var(--radius-sm);">
+                      <strong style="color: var(--primary); font-size: 13.5px; display: block; margin-bottom: 4px;">💡 Avis Technique Localisé :</strong>
+                      <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.6;">{local.conseilLocal}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div style="background: #F8FAFC; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 22px;">
+                  <h4 style="font-family: var(--font-heading); font-size: 13px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 15px; border-bottom: 1.5px solid var(--border-color); padding-bottom: 10px;">
+                    🔧 Normes Régionales ({commune.microRegionLabel || "44"})
+                  </h4>
+                  <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px; line-height: 1.6;">
+                    {commune.roofCharacteristics?.tuileDominante && (
+                      <li>🪨 <strong>Matériau principal :</strong> <span style="display: block; color: var(--text-muted); font-size: 12.5px;">{commune.roofCharacteristics.tuileDominante}</span></li>
+                    )}
+                    {commune.roofCharacteristics?.fixation && (
+                      <li>🔩 <strong>Fixation préconisée :</strong> <span style="display: block; color: var(--text-muted); font-size: 12.5px;">{commune.roofCharacteristics.fixation}</span></li>
+                    )}
+                    {commune.roofCharacteristics?.ventilation && (
+                      <li>💨 <strong>Ventilation requise :</strong> <span style="display: block; color: var(--text-muted); font-size: 12.5px;">{commune.roofCharacteristics.ventilation}</span></li>
+                    )}
+                    {commune.roofCharacteristics?.ecran && (
+                      <li>🛡️ <strong>Écran recommandé :</strong> <span style="display: block; color: var(--text-muted); font-size: 12.5px;">{commune.roofCharacteristics.ecran}</span></li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            <div class="grid-3">
+              {local.cards.map((card) => (
+                <div class="card">
+                  <div style="font-size: 28px; margin-bottom: 12px;">{card.icon}</div>
+                  <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">{card.title}</h3>
+                  <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.7; margin: 0;">
+                    {card.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+    if (sectionId === 'regulations') {
+      return (
+        <section style="padding: 70px 0; background: linear-gradient(180deg, #F1F5F9 0%, #fff 100%); border-top: 1.5px solid var(--border-color);">
+          <div class="container" style="max-width: 950px;">
+            <div style="text-align: center; margin-bottom: 45px;">
+              <h2 style="font-family: var(--font-heading); font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 14px;">
+                {local.headings.regulations}
+              </h2>
+              <p style="font-size: 15.5px; color: var(--text-muted);">
+                Ce qu'il faut absolument savoir avant de lancer vos travaux de couverture.
+              </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+              <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                  <span style="font-size: 26px;">📋</span>
+                  <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin: 0;">PLU &amp; Autorisations</h3>
+                </div>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin: 0;">{local.regulations.plu}</p>
+              </div>
+
+              <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                  <span style="font-size: 26px;">🌧️</span>
+                  <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin: 0;">Climat &amp; Pluie</h3>
+                </div>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin: 0;">{local.regulations.risqueIncendie}</p>
+              </div>
+
+              <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                  <span style="font-size: 26px;">🌬️</span>
+                  <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin: 0;">Résistance au Vent</h3>
+                </div>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin: 0;">{local.regulations.mistral}</p>
+              </div>
+
+              <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); padding: 28px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+                  <span style="font-size: 26px;">🏛️</span>
+                  <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin: 0;">Validation ABF</h3>
+                </div>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.75; margin: 0;">{local.regulations.abf}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    if (sectionId === 'prices') {
+      return (
+        <section style="padding: 70px 0; background-color: var(--card-bg);">
+          <div class="container">
+            <div style="text-align: center; max-width: 800px; margin: 0 auto 50px;">
+              <h2 style="font-family: var(--font-heading); font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 14px;">
+                {local.headings.prices}
+              </h2>
+              <p style="font-size: 15.5px; color: var(--text-muted);">
+                Indicateurs de prix moyens constatés en Loire-Atlantique (44) pour des chantiers de couverture en 2026. Tarifs TTC, main d'œuvre et fournitures comprises.
+              </p>
+            </div>
+
+            <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); max-width: 800px; margin: 0 auto 40px;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14.5px;">
+                <thead>
+                  <tr style="background: var(--primary); color: white;">
+                    <th style="padding: 14px 20px; font-family: var(--font-heading); font-weight: 800;">Type de Travaux</th>
+                    <th style="padding: 14px 20px; font-family: var(--font-heading); font-weight: 800;">Tarif Estimé à {commune.nom}</th>
+                    <th style="padding: 14px 20px; font-family: var(--font-heading); font-weight: 800;">Unité</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 14px 20px; font-weight: bold; color: var(--primary);">Réfection ardoise naturelle</td>
+                    <td style="padding: 14px 20px;"><span class="price-tag">{prices.refectionArdoiseAngers.min} – {prices.refectionArdoiseAngers.max} €</span></td>
+                    <td style="padding: 14px 20px; color: var(--text-muted); font-size: 13px;">au m² (voliges et dépose incluses)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--primary-light);">
+                    <td style="padding: 14px 20px; font-weight: bold; color: var(--primary);">Réfection ardoise synthétique</td>
+                    <td style="padding: 14px 20px;"><span class="price-tag">{prices.refectionArdoiseSynth.min} – {prices.refectionArdoiseSynth.max} €</span></td>
+                    <td style="padding: 14px 20px; color: var(--text-muted); font-size: 13px;">au m² (fibro-ciment économique)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 14px 20px; font-weight: bold; color: var(--primary);">Réfection toiture zinc joint debout</td>
+                    <td style="padding: 14px 20px;"><span class="price-tag">{prices.refectionZinc.min} – {prices.refectionZinc.max} €</span></td>
+                    <td style="padding: 14px 20px; color: var(--text-muted); font-size: 13px;">au m² (zinc 0.65mm)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border-color); background-color: var(--primary-light);">
+                    <td style="padding: 14px 20px; font-weight: bold; color: var(--primary);">Démoussage + traitement hydrofuge</td>
+                    <td style="padding: 14px 20px;"><span class="price-tag">{prices.demoussageHydro.min} – {prices.demoussageHydro.max} €</span></td>
+                    <td style="padding: 14px 20px; color: var(--text-muted); font-size: 13px;">au m² (pulvérisation fongicide)</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 14px 20px; font-weight: bold; color: var(--primary);">Réparation de fuite (urgence)</td>
+                    <td style="padding: 14px 20px;"><span class="price-tag">{prices.reparationFuite.min} – {prices.reparationFuite.max} €</span></td>
+                    <td style="padding: 14px 20px; color: var(--text-muted); font-size: 13px;">forfait intervention standard</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    if (sectionId === 'aides') {
+      return (
+        <section style="padding: 70px 0; background: linear-gradient(180deg, #fff 0%, #F1F5F9 100%); border-top: 1.5px solid var(--border-color); border-bottom: 1.5px solid var(--border-color);">
+          <div class="container" style="max-width: 900px;">
+            <div style="text-align: center; margin-bottom: 45px;">
+              <h2 style="font-family: var(--font-heading); font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 14px;">
+                {local.headings.aides}
+              </h2>
+              <p style="font-size: 15.5px; color: var(--text-muted);">
+                Comment financer l'isolation de votre toiture à {commune.nom} en 2026 ?
+              </p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+              <div style="background: white; border: 1.5px solid var(--border-color); padding: 22px 28px; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);">
+                <strong style="color: var(--primary); font-size: 16px; display: block; margin-bottom: 8px;">💶 MaPrimeRénov' (ANAH)</strong>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0;">{local.aides.maprime}</p>
+              </div>
+
+              <div style="background: white; border: 1.5px solid var(--border-color); padding: 22px 28px; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);">
+                <strong style="color: var(--primary); font-size: 16px; display: block; margin-bottom: 8px;">💶 Primes CEE de Loire-Atlantique</strong>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0;">{local.aides.cee}</p>
+              </div>
+
+              <div style="background: white; border: 1.5px solid var(--border-color); padding: 22px 28px; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);">
+                <strong style="color: var(--primary); font-size: 16px; display: block; margin-bottom: 8px;">💶 TVA à Taux Réduit (5,5%)</strong>
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0;">{local.aides.tva}</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 30px; background: white; border: 2px dashed var(--secondary); padding: 22px; border-radius: var(--radius-sm); text-align: center; font-size: 14.5px; color: var(--primary); font-weight: bold;">
+              💡 {local.aides.total}
+            </div>
+          </div>
+        </section>
+      );
+    }
+    if (sectionId === 'performance') {
+      return (
+        <section style="padding: 70px 0; background-color: var(--card-bg);">
+          <div class="container" style="max-width: 900px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+              <div>
+                <h2 style="font-family: var(--font-heading); font-size: 28px; font-weight: 900; color: var(--primary); margin-bottom: 18px;">
+                  {local.headings.performance}
+                </h2>
+                <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.75; margin-bottom: 18px;">
+                  {local.energyProfileText}
+                </p>
+                <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.75; margin: 0;">
+                  {local.realEstateInsight}
+                </p>
+              </div>
+
+              <div style="background: var(--primary-light); border: 2px dashed var(--border-color); padding: 30px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+                <h3 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 15px; text-align: center;">🔗 Liens &amp; Sources Officielles</h3>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 15px;">
+                  {local.externalLinks.map((link) => (
+                    <li style="font-size: 13px; line-height: 1.5;">
+                      <a href={link.href} target="_blank" rel="noopener noreferrer" style="font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px;">
+                        <span>{link.icon}</span> {link.label}
+                      </a>
+                      <span style="display: block; color: var(--text-muted); margin-top: 3px; margin-left: 20px;">{link.description}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+    return null;
+  })}
+
+  <!-- ═══ FAQ ═══ -->
+  <section style="padding: 70px 0; background-color: var(--bg); border-top: 1.5px solid var(--border-color);">
+    <div class="container" style="max-width: 860px;">
+      <div style="text-align: center; margin-bottom: 45px;">
+        <h2 style="font-family: var(--font-heading); font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 10px;">
+          FAQ Réfection de Toiture — {commune.nom} (44)
+        </h2>
+        <p style="font-size: 15.5px; color: var(--text-muted);">
+          Les réponses de nos couvreurs partenaires à vos questions techniques pour vos projets de toiture à {commune.nom}.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        {local.faqItems.map((item) => (
+          <div style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 24px; box-shadow: var(--shadow-sm); text-align: left;">
+            <h3 style="font-family: var(--font-heading); font-size: 17px; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; margin-top: 0;">
+              <span style="background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px;">Q</span>
+              {item.q}
+            </h3>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.75; margin: 0; padding-left: 36px;">
+              {item.a}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ GEOGRAPHIC LINKS ═══ -->
+  <section style="padding: 60px 0; background-color: var(--bg); border-top: 1.5px solid var(--border-color);">
+    <div class="container">
+      <h3 style="font-family: var(--font-heading); font-size: 22px; font-weight: 900; color: var(--primary); margin-bottom: 25px; text-align: center;">📍 Zones d'Intervention Proches de {commune.nom}</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px;">
+        {nearby.map((c) => (
+          <a href={`/refection-toiture-${c.slug}/`} style="background: white; border: 1.5px solid var(--border-color); padding: 16px 20px; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; text-decoration: none; font-weight: bold; color: var(--primary); transition: var(--transition);">
+            <span>🔨 Toiture à {c.nom} ({c.codePostal})</span>
+            <span style="color: var(--accent);">&rarr;</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

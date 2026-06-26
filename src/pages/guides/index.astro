@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+
+const posts = await getCollection('guides');
+const sortedPosts = posts.sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+
+const title = "Guides & Dossiers Techniques Rénovation Toiture Loire-Atlantique";
+const description = "Retrouvez tous nos dossiers pratiques sur l'entretien, l'isolation, la réfection de couverture ardoise, tuile ou zinc en Loire-Atlantique (44).";
+
+const breadcrumbItems = [
+  { label: "Accueil", href: "/" },
+  { label: "Guides & Dossiers" }
+];
+---
+
+<Layout title={title} description={description}>
+  <Breadcrumb items={breadcrumbItems} />
+
+  <section style="padding: 60px 0; background-color: var(--card-bg);">
+    <div class="container" style="max-width: 1000px;">
+      <div style="text-align: center; margin-bottom: 50px;">
+        <span class="badge-pill" style="margin-bottom: 15px; display: inline-block;">📚 Dossiers Pratiques</span>
+        <h1 style="font-family: var(--font-heading); font-size: 38px; font-weight: 900; color: var(--primary); margin: 0 0 15px; line-height: 1.2;">
+          Guides &amp; Conseils Toiture <span style="color: var(--accent);">Loire-Atlantique</span>
+        </h1>
+        <p style="font-size: 16.5px; color: var(--text-muted); max-width: 700px; margin: 0 auto; line-height: 1.6;">
+          Nos guides d'experts pour comprendre les contraintes du climat atlantique, estimer vos budgets, et réussir vos travaux de couverture.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; margin-bottom: 50px;">
+        {sortedPosts.map((post) => (
+          <article style="background: white; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: var(--transition);" class="guide-card">
+            {post.data.image && (
+              <a href={`/guides/${post.id}/`} style="display: block; overflow: hidden; height: 180px; border-bottom: 1.5px solid var(--border-color);">
+                <img 
+                  src={post.data.image} 
+                  alt={post.data.title} 
+                  style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition);" 
+                  class="guide-image"
+                />
+              </a>
+            )}
+            <div style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1; text-align: left;">
+              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 700; margin-bottom: 8px; display: block;">
+                📅 {new Date(post.data.publishDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </span>
+              <h2 style="font-family: var(--font-heading); font-size: 18px; font-weight: 800; color: var(--primary); margin: 0 0 12px; line-height: 1.35;">
+                <a href={`/guides/${post.id}/`} style="color: var(--primary); text-decoration: none; transition: var(--transition);" class="guide-title-link">
+                  {post.data.title}
+                </a>
+              </h2>
+              <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; flex-grow: 1;">
+                {post.data.description}
+              </p>
+              <a href={`/guides/${post.id}/`} style="font-weight: 700; color: var(--accent); font-size: 13.5px; text-decoration: none; display: flex; align-items: center; gap: 6px;" class="read-more-link">
+                Lire le guide complet <span style="font-size: 16px;">&rarr;</span>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+      
+      <div style="margin-top: 50px; padding: 40px; background-color: var(--primary-light); border: 2px dashed var(--border-color); border-radius: var(--radius-md); text-align: center;">
+        <h3 style="font-family: var(--font-heading); color: var(--primary); font-size: 24px; font-weight: 800; margin-bottom: 12px;">
+          Un projet de toiture ou de couverture en Loire-Atlantique ?
+        </h3>
+        <p style="color: var(--text-muted); font-size: 15.5px; margin-bottom: 25px; line-height: 1.6; max-width: 650px; margin-left: auto; margin-right: auto;">
+          Estimez votre budget gratuitement et comparez les offres de 3 artisans couvreurs certifiés RGE du 44.
+        </p>
+        <a href="/devis/" class="contact-btn" style="background: var(--secondary); color: var(--primary) !important; font-weight: 800; font-size: 16px; padding: 15px 35px; border-radius: 9999px; text-decoration: none; display: inline-block; box-shadow: var(--shadow-sm);">
+          Demander mes Devis Gratuits
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .guide-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+  .guide-card:hover .guide-image {
+    transform: scale(1.05);
+  }
+  .guide-title-link:hover {
+    color: var(--accent) !important;
+  }
+  .read-more-link:hover {
+    text-decoration: underline !important;
+  }
+</style>

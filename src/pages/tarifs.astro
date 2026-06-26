@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import StepsForm from '../components/StepsForm.astro';
+
+const title = "Prix Toiture en Loire-Atlantique (44) — Grille Tarifaire 2026";
+const description = "Retrouvez les prix moyens constatés au m² pour vos travaux de couverture, de charpente, de zinguerie zinc et de démoussage en Loire-Atlantique en 2026.";
+
+const breadcrumbItems = [
+  { label: "Accueil", href: "/" },
+  { label: "Tarifs Toiture Loire-Atlantique 2026" }
+];
+
+const priceList = [
+  { category: "Rénovation & Couverture", item: "Réfection ardoise naturelle (Ardoise Angers 32×22, pose crochet inox)", price: "120 – 190 € / m²", unit: "pose comprise" },
+  { category: "Rénovation & Couverture", item: "Réfection ardoise synthétique (Ardoise fibro-ciment)", price: "70 – 110 € / m²", unit: "pose comprise" },
+  { category: "Rénovation & Couverture", item: "Réfection toiture zinc (Joint debout zinc naturel 0.65mm)", price: "140 – 210 € / m²", unit: "pose comprise" },
+  { category: "Entretien & Nettoyage", item: "Démoussage + hydrofuge (Anti-mousse + traitement longue durée)", price: "12 – 30 € / m²", unit: "nettoyage + produit" },
+  { category: "Réparation Urgence", item: "Réparation fuite (Diagnostic + colmatage + ardoises cassées)", price: "350 – 1 500 €", unit: "par intervention" },
+  { category: "Zinguerie & Évacuation", item: "Zinguerie zinc naturel (Gouttières + descentes + dauphins)", price: "55 – 100 € / ml", unit: "pose comprise" },
+  { category: "Isolation Thermique", item: "Isolation sous rampants (Laine de bois ou ouate 240mm R=6)", price: "60 – 120 € / m²", unit: "pose comprise" },
+  { category: "Charpente & Structure", item: "Charpente traitement (Traitement xylophage + fongicide)", price: "20 – 45 € / m²", unit: "produit + pose" },
+  { category: "Sécurisation Urgence", item: "Bâchage urgence tempête (Protection temporaire + sécurisation)", price: "350 – 900 €", unit: "par intervention" }
+];
+---
+
+<Layout title={title} description={description}>
+  <Breadcrumb items={breadcrumbItems} />
+
+  <section style="padding: 50px 0 80px; background-color: var(--card-bg);">
+    <div class="container" style="max-width: 950px;">
+      <div style="text-align: center; margin-bottom: 50px;">
+        <span class="badge-pill" style="margin-bottom: 15px;">📊 Transparence des Prix</span>
+        <h1 style="font-family: var(--font-heading); font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 15px;">
+          Grille de Tarifs Toiture &amp; Couverture en Loire-Atlantique
+        </h1>
+        <p style="font-size: 16.5px; color: var(--text-muted); line-height: 1.6; max-width: 800px; margin: 0 auto;">
+          Les coûts de couverture en Loire-Atlantique dépendent de la proximité maritime, du matériau choisi (ardoise naturelle d'Angers, zinc, tuiles) et des contraintes d'urbanisme. Voici notre grille de référence 2026.
+        </p>
+      </div>
+
+      <div style="background: white; border: 2px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 50px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 15px;">
+          <thead>
+            <tr style="background: var(--primary); color: white;">
+              <th style="padding: 16px 20px; font-family: var(--font-heading); font-weight: 800;">Catégorie</th>
+              <th style="padding: 16px 20px; font-family: var(--font-heading); font-weight: 800;">Prestation</th>
+              <th style="padding: 16px 20px; font-family: var(--font-heading); font-weight: 800;">Tarif Moyen 2026</th>
+              <th style="padding: 16px 20px; font-family: var(--font-heading); font-weight: 800;">Conditions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {priceList.map((p, index) => (
+              <tr style={`border-bottom: 1px solid var(--border-color); ${index % 2 === 1 ? 'background-color: var(--primary-light);' : ''}`}>
+                <td style="padding: 15px 20px; font-weight: bold; color: var(--primary);">{p.category}</td>
+                <td style="padding: 15px 20px; color: var(--text);">{p.item}</td>
+                <td style="padding: 15px 20px;"><span class="price-tag">{p.price}</span></td>
+                <td style="padding: 15px 20px; color: var(--text-muted); font-size: 13.5px;">{p.unit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Two column block form & help -->
+      <div class="two-column-layout" style="gap: 40px; align-items: start;">
+        <div>
+          <h2 style="font-family: var(--font-heading); font-size: 24px; font-weight: 900; color: var(--primary); margin-bottom: 15px;">
+            Pourquoi les prix varient-ils en Loire-Atlantique ?
+          </h2>
+          <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 15px;">
+            1. <strong>La proximité maritime (sel &amp; vent d'ouest) :</strong> Les chantiers côtiers (Pornic, Saint-Nazaire, La Baule) nécessitent des crochets en acier inox 316 marine de forte épaisseur et des fixations renforcées pour résister aux tempêtes de l'océan, ce qui influe sur le prix des fournitures.
+          </p>
+          <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 15px;">
+            2. <strong>Les règles patrimoniales (ABF) :</strong> Le centre-ville de Nantes ou les cités médiévales (comme Guérande) imposent l'usage d'ardoise naturelle d'Angers de premier choix posée de façon artisanale. Ce travail traditionnel requiert plus de temps de main-d'œuvre.
+          </p>
+          <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 15px;">
+            3. <strong>L'humidité océanique et les mousses :</strong> Compte tenu du crachin fréquent, les matériaux subissent des agressions constantes. Un écran de sous-toiture HPV (respirant) de haute performance est indispensable pour éviter la stagnation d'humidité sous la couverture.
+          </p>
+        </div>
+
+        <div>
+          <StepsForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
